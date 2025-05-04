@@ -4,53 +4,64 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Read the movies_metadata file
-movies_metadata = pd.read_csv('./data/movies_metadata.csv')
-movies_metadata.head
+# Load data files
+def load_data():
+    """
+    Load movie metadata and ratings data from CSV files.
 
-# Count how many unique movies there are
-unique_movies_count = movies_metadata['movie_id'].nunique()
-unique_movies_count
+    Returns:
+    - DataFrame: Movies metadata DataFrame.
+    - DataFrame: Ratings DataFrame.
+    """
+    # Read the movies_metadata file
+    movies_metadata = pd.read_csv('./data/movies_metadata.csv')
+    
+    # Read the ratings file
+    ratings = pd.read_csv('./data/ratings.csv')
 
-# Visualise the vote_average column
-plt.figure(figsize=(10, 5))
-plt.hist(movies_metadata['vote_average'].dropna(), bins=30, edgecolor='k', alpha=0.7)
-plt.title('Distribution of Vote Averages')
-plt.xlabel('Vote Average')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+    return movies_metadata, ratings
 
-# Visualise the vote_count column
-plt.figure(figsize=(10, 5))
-plt.hist(movies_metadata['vote_count'].dropna(), bins=30, edgecolor='k', alpha=0.7)
-plt.title('Distribution of Vote Counts')
-plt.xlabel('Vote Count')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+# Plot the distribution of the movies metadata
+def plot_movies_metadata():
+    """
+    Plot the distribution of the movies metadata.
+    """
+    # Visualise the vote_average column
+    plt.figure(figsize=(10, 5))
+    plt.hist(movies_metadata['vote_average'].dropna(), bins=30, edgecolor='k', alpha=0.7)
+    plt.title('Distribution of Vote Averages')
+    plt.xlabel('Vote Average')
+    plt.ylabel('Frequency')
+    plt.grid(True)
+    plt.show()
 
-# Read the ratings file
-ratings = pd.read_csv('./data/ratings.csv')
-ratings.head()
+    # Visualise the vote_count column
+    plt.figure(figsize=(10, 5))
+    plt.hist(movies_metadata['vote_count'].dropna(), bins=30, edgecolor='k', alpha=0.7)
+    plt.title('Distribution of Vote Counts')
+    plt.xlabel('Vote Count')
+    plt.ylabel('Frequency')
+    plt.grid(True)
+    plt.show()
 
-# Count how many unique users have rated how many unique movies
-unique_users_count = ratings['user_id'].nunique()
-unique_rated_movies_count = ratings['movie_id'].nunique()
+# Plot the distribution of the ratings
+def plot_ratings():
+    """
+    Plot the distribution of the ratings.
+    """
+    # Visualise the distribution of the rating column
+    plt.figure(figsize=(10, 5))
+    plt.hist(ratings['rating'].dropna(), bins=10, edgecolor='k', alpha=0.7)
+    plt.title('Distribution of Ratings')
+    plt.xlabel('Rating')
+    plt.ylabel('Frequency')
+    plt.grid(True)
+    plt.show()
 
-# Display the unique counts of movies and users
-print(f"Unique Movies Count: {unique_movies_count}")
-print(f"Unique Users Count: {unique_users_count}")
-print(f"Unique Rated Movies Count: {unique_rated_movies_count}")
-
-# Visualise the distribution of the rating column
-plt.figure(figsize=(10, 5))
-plt.hist(ratings['rating'].dropna(), bins=10, edgecolor='k', alpha=0.7)
-plt.title('Distribution of Ratings')
-plt.xlabel('Rating')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.show()
+# Load movie metadata and ratings files
+movies_metadata, ratings = load_data()
+#plot_movies_metadata()
+#plot_ratings()
 
 # Simple recommender based on popularity or high rating
 def simple_recommender(criterion='vote_average', top_n=10):
@@ -79,14 +90,14 @@ def simple_recommender(criterion='vote_average', top_n=10):
     return top_recommended_movies
 
 # Example usage:
-top_movies_by_average = simple_recommender( criterion='vote_average', top_n=10)
-top_movies_by_count = simple_recommender(criterion='vote_count', top_n=10)
+#top_movies_by_average = simple_recommender( criterion='vote_average', top_n=10)
+#top_movies_by_count = simple_recommender(criterion='vote_count', top_n=10)
 
-print("Top Movies by Average Rating:")
-print(top_movies_by_average)
+#print("Top Movies by Average Rating:")
+#print(top_movies_by_average)
 
-print("\nTop Movies by Vote Count:")
-print(top_movies_by_count)
+#print("\nTop Movies by Vote Count:")
+#print(top_movies_by_count)
 
 # Generate recommendations based on user ratings
 from sklearn.metrics.pairwise import cosine_similarity
@@ -106,8 +117,6 @@ movie_similarity = cosine_similarity(user_movie_ratings.T)
 
 # Create a DataFrame for the cosine similarity matrix
 movie_sim_df = pd.DataFrame(movie_similarity, index=user_movie_ratings.columns, columns=user_movie_ratings.columns)
-
-print(movie_sim_df.head())
 
 def rating_based_recommender(movie_title, top_n=10):
     # Check if the movie title exists in the matrix
