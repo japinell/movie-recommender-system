@@ -87,3 +87,59 @@ print(top_movies_by_average)
 
 print("\nTop Movies by Vote Count:")
 print(top_movies_by_count)
+
+# Generate recommendations based on user ratings
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+# Merge movies metadata with ratings
+movies_ratings = pd.merge(ratings, movies_metadata, on='movie_id')
+
+# Create a pivot table with users as rows and movies as columns
+user_movie_ratings = movies_ratings.pivot_table(index='user_id', columns='title', values='rating')
+
+# Fill NaN values with 0 (assuming unrated movies have a rating of 0)
+user_movie_ratings = user_movie_ratings.fillna(0)
+
+# Compute the cosine similarity matrix
+movie_similarity = cosine_similarity(user_movie_ratings.T)
+
+# Create a DataFrame for the cosine similarity matrix
+movie_sim_df = pd.DataFrame(movie_similarity, index=user_movie_ratings.columns, columns=user_movie_ratings.columns)
+
+print(movie_sim_df.head())
+
+def rating_based_recommender(movie_title, top_n=10):
+    # Check if the movie title exists in the matrix
+    if movie_title not in user_movie_ratings.columns:
+        raise ValueError(f"Movie '{movie_title}' not found in the dataset.")
+
+    # Get the similarity scores for the given movie
+    similar_movies = movie_sim_df[movie_title]
+    
+    # Sort the movies based on the similarity scores
+    similar_movies = similar_movies.sort_values(ascending=False)
+
+    # Exclude the input movie itself
+    similar_movies = similar_movies.drop(movie_title)
+    
+    # Get the top N recommendations 
+    top_similar_movies = similar_movies.head(top_n)
+
+    # Merge with movie metadata to get additional information
+    top_similar_movies_df = top_similar_movies.reset_index().merge(movies_metadata, left_on='title', right_on='title')   
+    
+    return top_similar_movies_df
+
+# Example usage
+movie_title = "Gladiator"  # Replace with the movie title you want recommendations for
+recommended_movies = rating_based_recommender(movie_title, top_n=10)
+
+# Display the recommended movies    
+print(f"\nTop 10 recommendations for '{movie_title}':")
+print(recommended_movies[['title', 'overview', 'vote_average', 'vote_count']])
+
+
+
+
+
