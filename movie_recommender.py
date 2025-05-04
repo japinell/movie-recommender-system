@@ -51,3 +51,39 @@ plt.xlabel('Rating')
 plt.ylabel('Frequency')
 plt.grid(True)
 plt.show()
+
+# Simple recommender based on popularity or high rating
+def simple_recommender(criterion='vote_average', top_n=10):
+    """
+    Generate a simple recommender based on the specified criterion.
+
+    Parameters:
+    - criterion (str): Criterion to sort movies by. Either 'vote_average' or 'vote_count'.
+    - top_n (int): Number of top movies to recommend.
+
+    Returns:
+    - DataFrame: Top N recommended movies based on the specified criterion.
+    """
+    if criterion not in ['vote_average', 'vote_count']:
+        raise ValueError("Criterion must be either 'vote_average' or 'vote_count'")
+
+    # Sort movies by the specified criterion in descending order
+    recommended_movies = movies_metadata.sort_values(by=criterion, ascending=False)
+
+    # Select relevant columns to display
+    recommended_movies = recommended_movies[['title', 'overview', criterion]]
+    
+    # Select top n recommended movies
+    top_recommended_movies = recommended_movies.head(top_n)
+
+    return top_recommended_movies
+
+# Example usage:
+top_movies_by_average = simple_recommender( criterion='vote_average', top_n=10)
+top_movies_by_count = simple_recommender(criterion='vote_count', top_n=10)
+
+print("Top Movies by Average Rating:")
+print(top_movies_by_average)
+
+print("\nTop Movies by Vote Count:")
+print(top_movies_by_count)
