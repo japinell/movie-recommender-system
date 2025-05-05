@@ -153,10 +153,10 @@ from sentence_transformers import SentenceTransformer
 #import pandas as pd
 from tqdm import tqdm
 
-def generate_embeddings():
-    # Load a pre-trained model from Sentence Transformers
-    model = SentenceTransformer('all-MiniLM-L6-v2')
+# Load a pre-trained model from Sentence Transformers
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
+def generate_embeddings():   
     # Ensure the 'overview' column is filled with strings
     movies_metadata['overview'] = movies_metadata['overview'].fillna('').astype(str)
 
@@ -168,9 +168,30 @@ def generate_embeddings():
 generate_embeddings()
 
 # Display the first few rows to verify the embeddings
-print(movies_metadata[['title', 'overview', 'overview_embedding']].head())
+#print(movies_metadata[['title', 'overview', 'overview_embedding']].head())
 
+# Use embeddings similarity to generate recommendations
+#from sklearn.metrics.pairwise import cosine_similarity
+#import numpy as np
 
+def embedding_based_recommender(description, top_n=10):
+    # Generate embedding for the user input
+    description_embedding = model.encode(description)
+
+    tqdm.pandas(desc="Calculating movie similarities...")
+    
+    # Calculate cosine similarity between user input embedding and all movie embeddings
+    movies_metadata['similarity'] = movies_metadata['overview_embedding'].apply(lambda x: cosine_similarity([description_embedding], [x])[0][0] if x is not None else 0)
+    
+    # Sort movies by similarity in descending order and get the top n movies
+    top_movies = movies_metadata.sort_values(by='similarity', ascending=False).head(top_n)
+    
+    return top_movies[['title', 'overview', 'similarity']]
+
+# Example usage
+user_description = "A story about a young wizard who discovers his magical heritage."
+recommended_movies = embedding_based_recommender(user_description)
+print(recommended_movies)
 
 
 
