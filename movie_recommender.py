@@ -141,12 +141,35 @@ def rating_based_recommender(movie_title, top_n=10):
     return top_similar_movies_df
 
 # Example usage
-movie_title = "Gladiator"  # Replace with the movie title you want recommendations for
-recommended_movies = rating_based_recommender(movie_title, top_n=10)
+#movie_title = "Gladiator"  # Replace with the movie title you want recommendations for
+#recommended_movies = rating_based_recommender(movie_title, top_n=10)
 
 # Display the recommended movies    
-print(f"\nTop 10 recommendations for '{movie_title}':")
-print(recommended_movies[['title', 'overview', 'vote_average', 'vote_count']])
+#print(f"\nTop 10 recommendations for '{movie_title}':")
+#print(recommended_movies[['title', 'overview', 'vote_average', 'vote_count']])
+
+# Generate embeddings based on the movie descriptions
+from sentence_transformers import SentenceTransformer
+#import pandas as pd
+from tqdm import tqdm
+
+def generate_embeddings():
+    # Load a pre-trained model from Sentence Transformers
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+
+    # Ensure the 'overview' column is filled with strings
+    movies_metadata['overview'] = movies_metadata['overview'].fillna('').astype(str)
+
+    tqdm.pandas(desc="Generating embeddings...")
+
+    # Generate embeddings for the movie overviews
+    movies_metadata['overview_embedding'] = movies_metadata['overview'].progress_apply(lambda x: model.encode(x).tolist())
+    
+generate_embeddings()
+
+# Display the first few rows to verify the embeddings
+print(movies_metadata[['title', 'overview', 'overview_embedding']].head())
+
 
 
 
