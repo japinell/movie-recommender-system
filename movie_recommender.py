@@ -1,6 +1,6 @@
 # Movie Recommendation System
 # This script uses the framework provided by Bernd Schrooten in Building a Movie Recommendation System published by Packt Publishing
-# Code generated using DataCamp AI's Python code generation tool
+# Code generation assistant: DataCamp AI's Python code generation tool
 import pandas as pd
 import matplotlib.pyplot as plt
 
