@@ -189,10 +189,49 @@ def embedding_based_recommender(description, top_n=10):
     return top_movies[['title', 'overview', 'similarity']]
 
 # Example usage
+#user_description = "A story about a young wizard who discovers his magical heritage."
+#recommended_movies = embedding_based_recommender(user_description)
+#print(recommended_movies)
+
+# All recommender methods combined
+def combined_recommender(recommender_type='vote_average', user_input=None, top_n=10):
+    """
+    Combines four different recommenders into one function.
+
+    Parameters:
+    - recommender_type (str): Type of recommender to use. Options are 'vote_average', 'vote_count', 'similarity', or 'embedding'.
+    - user_input (str): User description or movie title.
+    - top_n (int): Number of top recommendations to return.
+
+    - movie_title (str): Title of the movie for which to find similar movies (only used if recommender_type is 'similar_movies').
+
+    Returns:
+    - list of top_n recommendations
+    """
+    if recommender_type == 'vote_average':
+        # Recommender based on vote_average 
+        return simple_recommender(criterion='vote_average', top_n=top_n)
+    
+    elif recommender_type == 'vote_count':
+        # Recommender based on vote_count
+        return simple_recommender(criterion='vote_count', top_n=top_n)
+    
+    elif recommender_type == 'similarity':
+        # Recommender based on ratings data for a given movie title
+        return rating_based_recommender(user_input, top_n=top_n)
+    
+    elif recommender_type == 'embedding':
+        # Recommender based on movie embeddings for a user-generated prompt
+        return embedding_based_recommender(user_input, top_n=top_n)
+    
+    else:
+        raise ValueError("Invalid method or missing parameters")
+
+# Example usage:
 user_description = "A story about a young wizard who discovers his magical heritage."
-recommended_movies = embedding_based_recommender(user_description)
-print(recommended_movies)
-
-
+top_recommendations = combined_recommender(recommender_type='vote_average', top_n=10)
+print(top_recommendations)
+# combined_recommender(method='similarity', movie_title='The Matrix', top_n=5)
+# combined_recommender(method='embedding', user_input=['The Matrix', 'Inception'], top_n=5)
 
 
